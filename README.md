@@ -1,18 +1,17 @@
-
 # SUIRouter
 
-SUIRouter is a powerful and flexible navigation library for SwiftUI applications that provides programmatic navigation control with a clean, declarative API. It supports iOS 15+, macOS 11+, watchOS 6+, and tvOS 13+.
+SUIRouter is a SwiftUI navigation library inspired by [UIPilot](https://github.com/canopas/UIPilot), optimized and redesigned specifically for SwiftUI applications. It provides a clean, type-safe navigation system that works seamlessly with SwiftUI's navigation architecture.
 
 ## Features
 
-- 🎯 Type-safe routing
-- 🔄 Programmatic navigation control
-- 🏗️ Built for SwiftUI
-- 📱 Deep linking support
-- 🎨 Clean and declarative API
-- 🔋 iOS 15+ and macOS 11+ support
-- 📊 Navigation state observation
-- ↩️ Custom back button handling
+- 🎯 SwiftUI-native navigation
+- 🔄 Type-safe routing with enum-based routes
+- 📱 iOS 15+ and macOS 11+ optimized
+- 🎨 Clean SwiftUI integration
+- 🔋 Support for NavigationStack (iOS 16+) and NavigationView
+- 📊 Navigation state observation system
+- ↩️ Custom back navigation handling
+- 🔄 Closure-based route callbacks
 
 ## Installation
 
@@ -35,7 +34,7 @@ Or in Xcode:
 
 ### 1. Define Your Routes
 
-First, define an enum that represents all possible routes in your application:
+Create an enum for your app's navigation routes:
 
 ```swift
 enum AppRoute: Equatable {
@@ -60,17 +59,7 @@ enum AppRoute: Equatable {
 }
 ```
 
-### 2. Initialize UIPilot
-
-Create a UIPilot instance with your routes:
-
-```swift
-let pilot = UIPilot<AppRoute>(debug: true)
-```
-
-### 3. Set Up Navigation Host
-
-Wrap your initial view with `UIPilotHost` and provide route mapping:
+### 2. Set Up Your Navigation Structure
 
 ```swift
 struct ContentView: View {
@@ -93,19 +82,40 @@ struct ContentView: View {
 }
 ```
 
-### 4. Navigate Between Screens
+### 3. Implement Your Views
 
-Use the pilot object to navigate between screens:
+Example of a view with navigation:
 
 ```swift
 struct HomeView: View {
     @EnvironmentObject var pilot: UIPilot<AppRoute>
     
     var body: some View {
-        Button("Go to Profile") {
+        VStack {
+            Button("Sign In") {
+                pilot.push(.signIn)
+            }
+            .padding()
+            .background(.green)
+        }
+        .navigationTitle("Home")
+    }
+}
+```
+
+### 4. Navigation with Callbacks
+
+Example using callback routes:
+
+```swift
+struct SignInView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+    
+    var body: some View {
+        Button("See Profile") {
             pilot.push(.profile(callback: {
                 // Handle sign out
-                pilot.popTo(.start)
+                self.pilot.popTo(.start)
             }))
         }
     }
@@ -115,78 +125,56 @@ struct HomeView: View {
 ## Navigation APIs
 
 ### Push a New Route
-
 ```swift
 pilot.push(.home)
 ```
 
 ### Pop Current Route
-
 ```swift
 pilot.pop()
 ```
 
 ### Pop to Specific Route
-
 ```swift
-// Pop to route, keeping the target route
+// Keep target route
 pilot.popTo(.home, inclusive: false)
 
-// Pop to route, removing the target route as well
+// Remove target route too
 pilot.popTo(.home, inclusive: true)
 ```
 
-## Advanced Features
+## iOS Version Compatibility
 
-### Navigation Observers
+SUIRouter automatically handles navigation differences between iOS versions:
 
-You can observe navigation changes by creating a custom observer:
+- iOS 16+: Uses `NavigationStack`
+- iOS 15 and earlier: Uses `NavigationView`
+
+This is handled internally by the library, providing a consistent API regardless of iOS version.
+
+## Observer Pattern
+
+Monitor navigation changes:
 
 ```swift
 class NavigationObserver: UIPilotObserverBase<AppRoute> {
     override func onPush(route: AppRoute) {
-        print("Pushed to: \(route)")
+        print("Pushed: \(route)")
     }
     
     override func onPop(route: AppRoute) {
-        print("Popped from: \(route)")
+        print("Popped: \(route)")
+    }
+    
+    override func onRouteChange(oldRoutes: [AppRoute], newRoutes: [AppRoute]) {
+        print("Route stack changed")
     }
 }
 
-// Add observer
+// Usage
 let observer = NavigationObserver(id: "main")
 pilot.addObserver(observer)
 ```
-
-### Custom Back Button Handling
-
-```swift
-struct CustomView: View {
-    var body: some View {
-        Text("Custom View")
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    CustomBackButton()
-                }
-            }
-    }
-}
-```
-
-## Best Practices
-
-1. **Route Definition**: Keep your route enum clean and organized. Group related routes together.
-
-2. **State Management**: Use the pilot object for navigation-related state management only.
-
-3. **View Organization**: Create separate view files for each route to maintain code organization.
-
-4. **Type Safety**: Leverage Swift's type system by passing necessary data through route cases.
-
-## Example Project
-
-Check out the complete example project in the repository for more detailed implementation patterns and best practices.
 
 ## Requirements
 
@@ -196,21 +184,42 @@ Check out the complete example project in the repository for more detailed imple
 - tvOS 13.0+
 - Swift 5.5+
 
+## Best Practices
+
+1. **Route Organization**
+   - Keep route cases logically grouped
+   - Use meaningful route names
+   - Document complex route parameters
+
+2. **View Structure**
+   - Use separate files for each view
+   - Keep navigation logic in parent views
+   - Leverage SwiftUI's view modifiers
+
+3. **Navigation State**
+   - Use `@EnvironmentObject` for pilot access
+   - Handle navigation callbacks appropriately
+   - Consider deep linking scenarios
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Credits
+
+This library is inspired by [UIPilot](https://github.com/canopas/UIPilot) and has been adapted specifically for SwiftUI with additional features and optimizations.
 
 ## License
 
 SUIRouter is available under the MIT license. See the LICENSE file for more info.
 
-## Support
-
-If you have any questions or need help, please:
-1. Check the documentation
-2. Open an issue on GitHub
-3. Contact the maintainers
-
 ## Author
 
 Created by Shahanul Haque
+
+## Support
+
+If you encounter any issues or need help:
+1. Check the documentation
+2. Open an issue on GitHub
+3. Contact the maintainers
