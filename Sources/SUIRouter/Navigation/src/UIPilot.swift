@@ -9,7 +9,10 @@ import OSLog
 import SwiftUI
 
 // Type-erased base class for navigation observers
-open class UIPilotObserverBase<T: Equatable>: Identifiable, Hashable {
+
+// Type-erased base class for navigation observers
+open class UIPilotObserverBase<T: Equatable & Sendable>: Identifiable, Hashable
+{
 
     public let id: String
     public init(id: String) {
@@ -35,7 +38,7 @@ open class UIPilotObserverBase<T: Equatable>: Identifiable, Hashable {
     }
 }
 
-public class UIPilot<T: Equatable>: ObservableObject {
+public class UIPilot<T: Equatable & Sendable>: ObservableObject {
     // Logger instance used for logging navigation actions
     private let logger: RouteLogger
 

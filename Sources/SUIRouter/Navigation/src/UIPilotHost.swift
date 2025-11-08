@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct UIPilotHost<T: Equatable, Screen: View>: View {
+public struct UIPilotHost<T: Equatable & Sendable, Screen: View>: View {
     // An observed object of type UIPilot to manage navigation paths.
     @ObservedObject
     private var pilot: UIPilot<T>
@@ -21,7 +21,10 @@ public struct UIPilotHost<T: Equatable, Screen: View>: View {
     private var viewGenerator = ViewGenerator<T, Screen>()
 
     // Initializer to set up the UIPilotHost with a pilot and a route map.
-    public init(_ pilot: UIPilot<T>, @ViewBuilder _ routeMap: @escaping (T) -> Screen) {
+    public init(
+        _ pilot: UIPilot<T>,
+        @ViewBuilder _ routeMap: @escaping (T) -> Screen
+    ) {
         self.pilot = pilot
         self.routeMap = routeMap
         // Set the onPop closure to call the pilot's systemPop method.
@@ -32,8 +35,8 @@ public struct UIPilotHost<T: Equatable, Screen: View>: View {
 
     // The body of the UIPilotHost view.
     public var body: some View {
-        if #available(iOS 16.0, macOS 13.0, *){
-//        if false{
+        if #available(iOS 16.0, macOS 13.0, *) {
+            //        if false{
             // Use NavigationStack for iOS 16 and later.
             NavigationStack {
                 viewGenerator.build(pilot.paths, routeMap)
@@ -45,7 +48,7 @@ public struct UIPilotHost<T: Equatable, Screen: View>: View {
                 viewGenerator.build(pilot.paths, routeMap)
             }
             #if !os(macOS)
-            .navigationViewStyle(.stack) // Use stack navigation view style on non-macOS platforms.
+                .navigationViewStyle(.stack)  // Use stack navigation view style on non-macOS platforms.
             #endif
             .environmentObject(pilot)
         }
@@ -80,12 +83,15 @@ class ViewGenerator<T: Equatable, Screen: View>: ObservableObject {
 
             // Link the current PathView to the next one.
             content.state.next = current
-            content.state.onPop = current == nil ? {} : { [weak self] in
-                // Trigger the onPop closure when the top-level view is popped.
-                if let self = self {
-                    self.onPop?(path)
+            content.state.onPop =
+                current == nil
+                ? {}
+                : { [weak self] in
+                    // Trigger the onPop closure when the top-level view is popped.
+                    if let self = self {
+                        self.onPop?(path)
+                    }
                 }
-            }
             current = content
         }
         // Return the top-level view in the hierarchy.

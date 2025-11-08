@@ -24,22 +24,25 @@ struct PathView<Screen: View>: View {
     // The body of the PathView.
     var body: some View {
         VStack {
-            if #available(iOS 16.0,macOS 13.0, *){
+            if #available(iOS 16.0, macOS 13.0, *) {
                 // Use navigationDestination for iOS 16 and later.
                 content
                     .navigationDestination(isPresented: $state.isActive) {
                         state.next
                     }
-                    // TODO: need a desicion about backbutton 
+                    // TODO: need a desicion about backbutton
                     .navigationBarBackButtonHidden()
             } else {
                 // Use NavigationLink for iOS versions earlier than 16.
-                NavigationLink(destination: self.state.next, isActive: self.$state.isActive) {
+                NavigationLink(
+                    destination: self.state.next,
+                    isActive: self.$state.isActive
+                ) {
                     EmptyView()
                 }
                 #if os(iOS)
-                // Disable detail link on iOS to avoid unwanted behaviour.
-                .isDetailLink(false)
+                    // Disable detail link on iOS to avoid unwanted behaviour.
+                    .isDetailLink(false)
                 #endif
                 content
             }
