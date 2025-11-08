@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct UIPilotHost<T: Equatable & Sendable, Screen: View>: View {
+public struct UIPilotHost<T: Equatable, Screen: View>: View {
     // An observed object of type UIPilot to manage navigation paths.
     @ObservedObject
     private var pilot: UIPilot<T>
